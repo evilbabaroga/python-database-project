@@ -25,10 +25,10 @@ def clean_company_name(name: str):
     # name = replace_all("'", "", name)
     name = replace_all("\"", "", name)
 
-    legal_entities = ["LIMITED", "LTD", "LTD."]
+    legal_entities = ["LIMITED", "LTD", "LTD.", "PARTNERSHIP", "HOLDINGS", "TRUST"]
     name = ' '.join(name.split()[:-2] + list(filter(lambda word: word.upper() not in legal_entities, name.split()[-2:])))
 
-    # Strip clears trailing whitespace if it exists
+    # Strip clears trailing spaces if they exist
     name = name.capitalize().strip()
     # Cleans extra spaces inbetween words
     name = ' '.join(name.split())

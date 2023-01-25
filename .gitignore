@@ -1,4 +1,7 @@
+# Custom files
 semos_companies_data.db
+semos_companies_data - Copy.db
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
