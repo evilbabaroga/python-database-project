@@ -1,9 +1,27 @@
 def replace_all(old, new, word):
+    """
+    Replace each occurrence of a substring with a given string.
+
+    params:
+        old: str - the substring to be replaced
+        new: str - the replacement
+        word: str - the given string
+    returns:
+        str - the transformed string
+    """
     while word.find(old) != -1:
         word = word.replace(old, new)
     return word
 
 def upper_first_letter(word):
+    """
+    Capitalize a string without changing anything else.
+
+    params:
+        word: str - the string
+    returns:
+        str - the changed string
+    """
     if len(word) == 0:
         return word
     if len(word) == 1:
