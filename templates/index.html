@@ -2,38 +2,165 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" name="viewport" content="width=device-width" >
-        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='/favicon.ico') }}">
+        <link rel="icon" href="{{ url_for('static', filename='/favicon.ico') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
         <title>MongoDB Project</title>
     </head>
-    <body>
+    <body onload="flashMessage()">
+        <script>
+            const flashMessage = () => {
+                if ("{{ cleaned }}" == "True")
+                    alert("Database successfully cleaned!");
+            }
+        </script>
         <div id="title">
-            <h1>MONGO DATABASE FLASK APP</h1>
+            <h1>PYTHON DATABASE PROJECT</h1>
         </div>
-        <div id="buttons">
-            <button type="button" class="defaultButton" onclick="window.location.href=`{{ url_for('cleanDB') }}`;">CLEAN DB</button>
-            <button class="defaultButton" onclick="window.location.href=`{{ url_for('mongoDBRead') }}`;">DISPLAY 20 ENTRIES</button>
-        </div>
-        <div id="DBContainer">
-            <span class="entityName">
-                {% if dbName != '' %}
-                    {% set db_text = 'Database name:' %}
+        <div id="topBar">
+            <div class="DBContainer">
+                <span class="entityName">
+                    {% if not error %}
+                        {% set db_text = 'Database name:' %}
+                    {% endif %}
+                    {% if not error %}
+                        {{ db_text }}
+                    {% else %}
+                        <h2 class="invalid">INVALID SQLITE DATABASE</h2>
+                    {% endif %}
+                </span>
+                {% if not loaded %}
+                <h2 style="color: rgba(235, 217, 178, 0.2);">{{ dbName }}</h2>
+                {% else %}
+                <h2>{{ dbName }}</h2>
                 {% endif %}
-                {{ db_text }}
-            </span>
-            <h1>{{ dbName }}</h1>
-            <span class="entityName">
-                {% if tableName != '' %}
-                    {% set table_text = 'Table name:' %}
+                <div id="br"></div>
+                <span class="entityName">
+                    {% if not error %}
+                        {% set table_text = 'Collection name:' %}
+                    {% endif %}
+                    {{ table_text }}
+                </span>
+                {% if not loaded %}
+                <h2 style="color: rgba(235, 217, 178, 0.2);">{{ dbName }}</h2>
+                {% else %}
+                <h2>{{ tableName }}</h2>
                 {% endif %}
-                {{ table_text }}
-            </span>
-            <h1>{{ tableName }}</h1>
-            <div id="documents">
-                {% for entry in entries %}
-                <div class="dbEntry"><pre>{{ entry }}</pre></div>
-                {% endfor %}
+            </div>
+            <div class="DBContainer">
+                <span class="entityName">
+                    {% if not error %}
+                        {% set db_text = 'Number of documents:' %}
+                    {% endif %}
+                    {% if not error %}
+                        {{ db_text }}
+                    {% else %}
+                        <h2 class="invalid">INVALID SQLITE DATABASE</h2>
+                    {% endif %}
+                </span>
+                {% if not loaded %}
+                <h2 style="color: rgba(235, 217, 178, 0.2);">{{ dbName }}</h2>
+                {% else %}
+                <h2>{{ numdocs }}</h2>
+                {% endif %}
+                <div id="br"></div>
+                <span class="entityName">
+                    {% if not error %}
+                        {% set table_text = 'MongoDB key:' %}
+                    {% endif %}
+                    {{ table_text }}
+                </span>
+                {% if not loaded %}
+                <h2 style="color: rgba(235, 217, 178, 0.2);">{{ dbName }}</h2>
+                {% else %}
+                <h2>{{ mongo_db_key }}</h2>
+                {% endif %}
+
+            </div>
+            <div id="gitDiv">
+                <span>GitHub profile:</span>
+                <a title="evilbabaroga (Kristijan Lazevski)" alt="x" href="//github.com/evilbabaroga"></a>
+                <span style="font-weight: bold;">@evilbabaroga</span>
             </div>
         </div>
+        <div id="buttons">
+            <form id="cleanButton" method="POST">
+                <input type="submit" class="defaultButton" value="CLEAN SQLITE DATABASE" name="clean">
+            </form>
+            <button type="button" class="defaultButton" onclick="window.location.href=`{{ url_for('mongoDBRead', start=1, end=20)}}`;">LOAD MONGODB DATABASE</button>
+        </div>
+        {%if loaded %}
+        <div id="aboveDocumentsBar">
+            <div class="entityName">Documents:</div>
+            <div id="queryContainer">
+                <span>Query by id:</span>
+                <form class="number-input" method="post">
+                    <input min="1" max="20000" placeholder="from" name="from" type="number">
+                    <input min="1" max="20000" placeholder="to" name="to" type="number">
+                    <input type="submit" value="">
+                </form>
+            </div>
+            <div id="views">
+                <form  id="viewForm">
+                    <label>
+                        <input id="jsonViewButton" type="radio" name="view" value="json" onclick="hideTable()"/>
+                        <span id="json_view" style="color: var(--default--text--color);">{}</span>
+                    </label>
+                    <label id="tableViewLabel">
+                        <input id="tableViewButton" type="radio" name="view" value="table" onclick="hideJson()"/>
+                        <span id="table_view" style="background-image: url('/static/imgs/table_view_checked.png');"></span>
+                    </label>
+                </form>
+            </div>
+        </div>
+        <!-- The documents are displayed here -->
+        <div id="documents-json" style="display: none;">
+            {% for entry in entries %}
+            <div class="db-entry-json"><pre>{{ entry }}</pre></div>
+            {% endfor %}
+        </div>
+        <div id="documents-table">
+            <div id="tables">
+            {% for entry in tableEntries %}
+                <div class="table">
+                    {% for val in entry %}
+                    <div class="table-cell">{{ val }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </body>
+    <script>
+        jsonView = document.getElementById("documents-json");
+        tableView = document.getElementById("documents-table");
+        jsonViewButton = document.getElementById("jsonViewButton");
+        tableViewButton = document.getElementById("tableViewButton");
+
+        let cs = getComputedStyle(document.querySelector(':root'));
+        const pressJson = () => {
+            document.getElementById("json_view").style.color = cs.getPropertyValue('--orange--color') 
+            document.getElementById("table_view").style.backgroundImage = cs.getPropertyValue('--table--view')
+        }
+
+        const pressTable = () => {
+            document.getElementById("table_view").style.backgroundImage = cs.getPropertyValue('--checked--table--view')
+            document.getElementById("json_view").style.color = cs.getPropertyValue('--default--text--color')
+        }
+
+        const hideJson = () => {
+            pressTable();
+            jsonView.style.display = "none"
+            tableView.style.display = "grid"
+        }
+
+        const hideTable = () => {
+            pressJson();
+            tableView.style.display = "none"
+            jsonView.style.display = "grid"
+        }
+
+        document.cookie = ""
+    </script>
 </html>
